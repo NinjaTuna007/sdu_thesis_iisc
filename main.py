@@ -235,7 +235,7 @@ def obj_new (b_0, *params):
   
   ## single var optimization
   
-  def training(data, male_params, female_params, num_epochs = 500, ETA = 0, SIGMA = 1e-3,  lr = 5e-3):
+def training(data, male_params, female_params, num_epochs = 500, ETA = 0, SIGMA = 1e-3,  lr = 5e-3):
   acc_list = []
   fair_list = []
 
@@ -281,19 +281,29 @@ def obj_new (b_0, *params):
   ranges = [(-np.inf, np.inf)]*(len(male_params) - 1) #+ [(0,1)]
   #print(ranges)
 
-  # initial networks should be fixed at threshold 0.5Boolean Series key will be reindexed to match DataFrame index.
+  # initial networks should be fixed at threshold 0.5
 
   res = optimize.minimize(solo_objective, male_params[:-1], args=(X_data_male, Y_data_male, 0.5, SIGMA), bounds=ranges)
+  ros = res.x
+ # print(ros)
+  ros = ros/np.linalg.norm(ros)
+ # print(ros)
   #new_male_params = res.x
-  new_male_params = np.array(list(res.x)+ [0.5]).flatten().astype(float)
+  new_male_params = np.append(ros, 0.5)
   #print (res)
+  acc_male = accuracy(Y_data_male, predictions(new_male_params, X_data_male))
   print("Initial male accuracy is:", accuracy(Y_data_male, predictions(new_male_params, X_data_male)))
 
-
   res = optimize.minimize(solo_objective, female_params[:-1], args=(X_data_female, Y_data_female, 0.5, SIGMA), bounds=ranges)
+  ros = res.x
+ # print(ros)
+  ros = ros/np.linalg.norm(ros)
+ # print(ros)
+
   #new_female_params = res.x
-  new_female_params = np.array(list(res.x)+ [0.5]).flatten().astype(float)
+  new_female_params = np.append(ros, 0.5)
   #print(res)
+
   print("Initial female accuracy is:", accuracy(Y_data_female, predictions(new_female_params, X_data_female)))
 
   male_preds = predictions(new_male_params,X_data_male)
